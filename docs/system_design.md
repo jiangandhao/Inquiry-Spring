@@ -6,15 +6,21 @@
 ```mermaid
 graph TB
     subgraph 前端层
-        A1[Web界面] --> A2[Django模板]
-        A2 --> A3[WebSocket客户端]
+        A1[Web应用] --> A2[Vue2核心]
+        A2 --> A3[Vuex状态管理]
+        A3 --> A4[Element UI组件库]
+        A2 --> A5[Vue Router路由]
+        A1 --> A6[WebSocket客户端]
+        A1 --> A7[Axios API服务]
+        A4 --> A8[自定义业务组件]
+        A2 --> A9[Vue CLI工程化]
     end
 
     subgraph 后端层
         B1[Django应用] --> B2[视图层]
         B2 --> B3[业务逻辑层]
         B3 --> B4[AI服务层]
-        B3 --> B5[Channels]
+        B3 --> B5[Channels WebSocket]
     end
 
     subgraph 数据层
@@ -27,7 +33,8 @@ graph TB
         D2 --> D3[向量检索]
     end
 
-    A3 --> B1
+    A6 --> B5
+    A7 --> B2
     B4 --> D1
     B3 --> C1
     D3 --> C2
@@ -35,21 +42,31 @@ graph TB
 
 ### 1.2 技术栈选型
 1. 前端技术
-   - Django模板引擎
-   - Vue.js 3.0
-   - Element Plus UI框架
-   - Axios HTTP客户端
-
+   - 核心框架
+      - Vue 2.7（Options API）
+      - Vue Router 3.6
+      - Vuex 3.6（状态管理）
+   - UI框架
+      - Element UI 2.15（基础组件库）
+      - SCSS 1.32（样式预处理器）
+      - Vue-Awesome 4.0（图标库）
+   - 网络通信
+      - Axios 0.21（REST API调用）
+      - WebSocket（实时通信）
+      - JWT认证（Token管理）
+   - 工程化工具
+      - Vue CLI 5.0（项目脚手架）
+      - Webpack 5.0（构建工具）
+      - Babel 7.0（ES6转译）
+   
 2. 后端技术
    - Django 4.2
    - Django REST framework（核心API）
    - Django Channels（WebSocket支持）
-
 3. 数据存储
    - SQLite（开发阶段）
    - Chroma 向量数据库
    - 文件存储系统
-
 4. AI技术
    - LangChain 框架
    - OpenAI/Gemini API
