@@ -6,9 +6,10 @@ class Quiz(models.Model):
     """测验集合模型"""
     
     DIFFICULTY_CHOICES = [
-        (1, '简单'),
-        (2, '中等'),
-        (3, '困难'),
+        ('easy', '简单'),
+        ('medium', '中等'),
+        ('hard', '困难'),
+        ('master', '大师'),
     ]
     
     document = models.ForeignKey(
@@ -44,7 +45,8 @@ class Question(models.Model):
     """题目模型"""
     
     QUESTION_TYPES = [
-        ('MC', '选择题'),
+        ('MC', '单选题'),
+        ('MCM', '多选题'),
         ('TF', '判断题'),
         ('FB', '填空题'),
         ('SA', '简答题'),
@@ -57,13 +59,13 @@ class Question(models.Model):
         verbose_name='所属测验'
     )
     content = models.TextField('题目内容')
-    question_type = models.CharField('题目类型', max_length=2, choices=QUESTION_TYPES)
+    question_type = models.CharField('题目类型', max_length=3, choices=QUESTION_TYPES)
     
     # 选项（JSON格式存储）
     options = models.JSONField('选项', null=True, blank=True)
     
     # 答案
-    correct_answer = models.TextField('正确答案')
+    correct_answer = models.JSONField('正确答案')
     explanation = models.TextField('解释说明')
     
     # 来源信息
