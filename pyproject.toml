@@ -1,0 +1,22 @@
+[project]
+name = "InquirySpring"
+version = "0.1.0"
+description = "Intelligent Inquiry System"
+authors = [
+    { name="Ao-chii", email="2543327978@qq.com" }
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "Django>=4.0",
+    "LangChain>=0.2.1",
+    "LangChain-Community>=0.2.1",
+    "LangChain-HuggingFace>=0.2.1",
+    "LangChain-OpenAI>=0.2.1",
+    "LangChain-Replicate>=0.2.1",
+    "LangChain-Google>=0.2.1",
+    "LangChain-Anthropic>=0.2.1",
+]
+
+[project.urls]
+"Home" = "https://github.com/Ao-chii/Inquiry-Spring"
