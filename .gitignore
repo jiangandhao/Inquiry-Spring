@@ -1,1 +1,9 @@
-.cursor/rules/creater.mdc
+.cursor/rules
+structure.txt
+apps/__pycache__
+apps/chat/__pycache__
+apps/ai_services/__pycache__
+apps/documents/__pycache__
+apps/quiz/__pycache__
+InquirySpring/__pycache__
+.idea
