@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 import json
@@ -27,7 +27,7 @@ class DocumentDetailView(DetailView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class DocumentUploadView:
+class DocumentUploadView(View):
     """文档上传视图"""
     
     def post(self, request):

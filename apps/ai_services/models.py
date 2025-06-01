@@ -5,14 +5,12 @@ class AIModel(models.Model):
     """AI模型配置"""
     
     PROVIDER_CHOICES = [
-        ('openai', 'OpenAI'),
         ('gemini', 'Google Gemini'),
-        ('anthropic', 'Anthropic Claude'),
         ('local', '本地模型'),
     ]
     
     name = models.CharField('模型名称', max_length=100)
-    provider = models.CharField('提供商', max_length=20, choices=PROVIDER_CHOICES)
+    provider = models.CharField('供应商', max_length=20, choices=PROVIDER_CHOICES)
     model_id = models.CharField('模型ID', max_length=100)
     api_key = models.CharField('API密钥', max_length=200, blank=True)
     api_base = models.URLField('API基础URL', blank=True)
@@ -48,10 +46,10 @@ class PromptTemplate(models.Model):
     
     TEMPLATE_TYPES = [
         ('quiz_generation', '测验生成'),
+        ('quiz_without_doc', '无文档测验生成'),
         ('chat_response', '聊天回复'),
         ('explanation', '解释生成'),
         ('summary', '总结生成'),
-        ('glossary', '词汇表生成'),
     ]
     
     name = models.CharField('模板名称', max_length=100)
