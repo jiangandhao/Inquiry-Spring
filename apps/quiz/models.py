@@ -16,11 +16,13 @@ class Quiz(models.Model):
         Document, 
         on_delete=models.CASCADE, 
         related_name='quizzes',
-        verbose_name='关联文档'
+        verbose_name='关联文档',
+        null=True,
+        blank=True
     )
     title = models.CharField('测验标题', max_length=200)
     description = models.TextField('测验描述', blank=True)
-    difficulty_level = models.IntegerField('难度级别', choices=DIFFICULTY_CHOICES, default=2)
+    difficulty_level = models.CharField('难度级别', max_length=10, choices=DIFFICULTY_CHOICES, default='medium')
     total_questions = models.PositiveIntegerField('题目总数', default=0)
     
     # 配置信息
@@ -38,7 +40,9 @@ class Quiz(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"{self.title} ({self.document.title})"
+        if self.document:
+            return f"{self.title} ({self.document.title})"
+        return f"{self.title} (无文档)"
 
 
 class Question(models.Model):

@@ -213,16 +213,74 @@ class PromptManager:
         文档内容:
         $content
 
+        长度要求:
+        $length_requirement
+
+        格式要求:
+        $outline_requirement
+
         要求:
-        1. 摘要长度不应太长，根据原文长度而定，可以是原文的10-15%
-        2. 保留文档的核心信息和关键点
-        3. 使用清晰、专业的语言
-        4. 保持客观，不添加原文中没有的信息
-        5. 结构化呈现，可以使用小标题或编号列表
-        6. 如果文档包含技术术语，请保留并简要解释
-        7. 突出文档中的重要数据或发现
+        1. 保留文档的核心信息和关键点
+        2. 使用清晰、专业的语言
+        3. 保持客观，不添加原文中没有的信息
+        4. 结构化呈现，可以使用小标题或编号列表
+        5. 如果文档包含技术术语，请保留并简要解释
+        6. 突出文档中的重要数据或发现
+        7. 标记特别重要的内容以便阅读者关注
 
         摘要:
+        """
+    
+    @staticmethod
+    def get_default_quiz_without_doc_template() -> str:
+        # 获取默认的无文档测验生成模板
+        return """
+        你是一个专业的教育测验出题专家。请根据以下主题和要求，生成高质量的测验题目。
+
+        主题: $topic
+        
+        请生成 $question_count 道测验题，题型包括: $question_types。
+        难度级别: $difficulty（easy, medium, hard, master）
+
+        支持的题型说明:
+        - MC: 单选题 - 提供4个选项(A,B,C,D)，只有1个正确答案
+        - MCM: 多选题 - 提供4-6个选项，有2个或更多正确答案
+        - TF: 判断题 - 判断陈述是"正确"还是"错误"
+        - FB: 填空题 - 需要填写单词、短语或句子
+        - SA: 简答题 - 需要学生用自己的话回答，提供关键点列表作为参考答案
+
+        额外约束和要求:
+        $constraints
+
+        要求:
+        1. 问题必须与主题相关，且符合额外约束要求
+        2. 问题必须明确且答案准确
+        3. 为每个问题提供详细的解析，解释为何正确答案是正确的
+        4. 答案解析应引用相关知识点
+        5. 按以下JSON格式返回:
+
+        ```json
+        [
+        {
+            "content": "问题内容",
+            "type": "MC", // MC=单选题，MCM=多选题，TF=判断题，FB=填空题，SA=简答题
+            "options": ["选项A", "选项B", "选项C", "选项D"], // 选择题需要
+            "correct_answer": "正确答案", // 根据题型不同有不同格式：
+                                        // 单选题: "A"、"B"等字母
+                                        // 多选题: ["A", "C"]等字母数组
+                                        // 判断题: "正确"或"错误"
+                                        // 填空题: "具体答案文本"
+                                        // 简答题: ["关键点1", "关键点2", ...]
+            "explanation": "详细解析",
+            "difficulty": "medium" // 难度：easy, medium, hard, master
+        },
+        // 更多题目...
+        ]
+        ```
+
+        对于简答题，正确答案应包含评分要点（关键词或关键概念的列表）。
+
+        仅返回JSON格式的答案，不要有其他文字。
         """
     
     @staticmethod
@@ -242,6 +300,14 @@ class PromptManager:
                     'template_type': 'quiz_generation',
                     'content': PromptManager.get_default_quiz_template(),
                     'variables': ['content', 'question_count', 'question_types', 'difficulty'],
+                    'version': '1.0',
+                    'is_active': True
+                },
+                {
+                    'name': '无文档测验生成',
+                    'template_type': 'quiz_without_doc',
+                    'content': PromptManager.get_default_quiz_without_doc_template(),
+                    'variables': ['topic', 'constraints', 'question_count', 'question_types', 'difficulty'],
                     'version': '1.0',
                     'is_active': True
                 },

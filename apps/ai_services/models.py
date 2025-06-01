@@ -46,6 +46,7 @@ class PromptTemplate(models.Model):
     
     TEMPLATE_TYPES = [
         ('quiz_generation', '测验生成'),
+        ('quiz_without_doc', '无文档测验生成'),
         ('chat_response', '聊天回复'),
         ('explanation', '解释生成'),
         ('summary', '总结生成'),

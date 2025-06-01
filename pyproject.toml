@@ -24,6 +24,8 @@ dependencies = [
     "python-docx>=0.8.11",
     "python-multipart>=0.0.6",
     "google-generativeai==0.8.5",
+    "torch==2.7.0",
+    "transformers==4.52.3",
 ]
 
 [project.urls]
