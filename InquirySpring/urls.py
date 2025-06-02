@@ -17,23 +17,31 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
-from apps.documents.views import home_view
+import api_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    # 首页
-    path('', home_view, name='home'),
+    # ==================== API 路由 ====================
+    # 按照Django最佳实践，将API划分到各自的应用中
 
-    # 应用路由
+    # 主API根视图
+    path('api/', api_views.api_root, name='api_root'),
+    path('api/health/', api_views.api_health, name='api_health'),
+
+    # API v1 路由
+    path('api/v1/chat/', include('apps.chat.urls')),
+    path('api/v1/documents/', include('apps.documents.urls')),
+    path('api/v1/quiz/', include('apps.quiz.urls')),
+
+    # 兼容性路由（保持向后兼容）
+    path('chat/', include('apps.chat.urls')),
     path('documents/', include('apps.documents.urls')),
     path('quiz/', include('apps.quiz.urls')),
-    path('chat/', include('apps.chat.urls')),
 ]
 
-# 开发环境下的媒体文件服务
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# ==================== 静态文件服务已移除 ====================
+# 前端开发由其他团队负责，本项目专注于API设计
+# 如需要媒体文件服务，可以取消注释以下代码：
+# if settings.DEBUG:
+#     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
