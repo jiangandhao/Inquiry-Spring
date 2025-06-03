@@ -1,6 +1,6 @@
 <template>
     <el-container style="height: 100vh; background: linear-gradient(135deg, #f5f1e8 0%, #f0e6d2 100%)">
-    <el-aside width="240px" style="background: linear-gradient(to bottom, #e8dfc8, #d8cfb8); border-right: 1px solid #d4c9a8; border-radius: 0 12px 12px 0; box-shadow: 2px 0 10px rgba(0,0,0,0.1)">
+    <el-aside width="240px" style="background: linear-gradient(to bottom, #e8dfc8, #d8cfb8); border-right: 1px solid #d4c9a8; border-radius: 0 12px 12px 0; box-shadow: 2px 0 10px rgba(0,0,0,0.1);overflow-x: hidden">
         <el-row :gutter="20">
             <div style="color: #5a4a3a; padding: 15px; font-size: 18px; font-weight: bold; display: flex; flex-direction: column; align-items: center;">
                 <div>
@@ -48,7 +48,7 @@
                         <el-upload
                         class="upload-demo"
                         drag
-                        action="/api/fileUpload/"
+                        action="/api/test/"
                         multiple>
                         <i class="el-icon-upload" style="color: #8b7355;"></i>
                         <div class="el-upload__text" style="color: #5a4a3a;">将文件拖到此处，或<em style="color: #8b7355;">点击上传</em></div>
@@ -64,7 +64,6 @@
                         </h3>
                         <el-form ref="testReq" :model="testReq" label-width="80px">
                             <el-form-item label="题目数量">
-                                <!-- <el-input type="text" maxlength="2" v-model="testReq.num"></el-input> -->
                                  <div class="block">
                                     <el-slider
                                     v-model="testReq.num"
@@ -129,12 +128,12 @@
                             v-if="panel.includes(i)"
                         >
                         <el-row>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                            <div>{{ question[i]?.type }}:</div>
+                            <div v-html="formatQuestion(question[i]?.question)"></div>
                         </el-row>
                         <el-row>
-                            <v-text-field label="输入答案"></v-text-field>
+                            <v-text-field label="输入答案" v-model="answer[i]"></v-text-field>
                         </el-row>
-                        
                         </v-expansion-panel-content>
                     </v-expansion-panel>
                     </v-expansion-panels>
@@ -180,6 +179,8 @@
 </style>
 
 <script>
+import axios from 'axios';
+
 export default {
     data() {
         return {
@@ -191,7 +192,27 @@ export default {
                 type:[],
                 level:"",
                 desc:""
-            }
+            },
+            q:"ddd",
+            question:[
+                {
+                    type:"单选题",
+                    question:"1+1=?"
+                },
+                {
+                    type:"多选题",
+                    question:"2+2=?"
+                },
+                {
+                    type:"判断题",
+                    question:"3>2?"
+                },
+                {
+                    type:"填空题",
+                    question:"4-1=?"
+                }
+            ],
+            answer: ["", "", "", ""] // 初始化答案数组
         }
     },
     methods: {
@@ -216,12 +237,19 @@ export default {
             this.items=this.testReq.num
             if(this.items>0){
                 this.testVisible=true
-
             }
+            axios.post('/api/test/',this.testReq).then(res=>{
+                this.question=res.data.AIQuestion;
+            })
+        
         },
         submitAns(){
-            window.alert("提交成功")
-        }
+            window.alert(this.answer[0])
+        },
+        formatQuestion(q) {
+            if (!q) return '';
+            return q.replace(/\n/g, '<br>');
+        },
     }
 };
 </script>

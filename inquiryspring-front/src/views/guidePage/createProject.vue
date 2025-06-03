@@ -2,7 +2,7 @@
   <!-- 主容器，使用与chatPage一致的背景色 -->
   <el-container style="height: 100vh; background: linear-gradient(135deg, #f5f1e8 0%, #f0e6d2 100%)">
     <!-- 侧边栏导航 -->
-    <el-aside width="240px" style="background: #f1e9dd; border-right: 1px solid #e0d6c2; border-radius: 0 12px 12px 0; box-shadow: 2px 0 10px rgba(0,0,0,0.05)">
+    <el-aside width="240px" style="background: #f1e9dd; border-right: 1px solid #e0d6c2; border-radius: 0 12px 12px 0; box-shadow: 2px 0 10px rgba(0,0,0,0.05);overflow-x: hidden">
       <el-row :gutter="20">
         <div style="color: #5a4a3a; padding: 15px; font-size: 18px; font-weight: bold; display: flex; align-items: center;">
           <i class="el-icon-connection" style="margin-right: 8px; color: #8b7355"></i>

@@ -1,6 +1,6 @@
 <template>
     <el-container style="height: 100vh; background: linear-gradient(135deg, #f5f1e8 0%, #f0e6d2 100%)">
-    <el-aside width="240px" style="background: linear-gradient(to bottom, #e8dfc8, #d8cfb8); border-right: 1px solid #d4c9a8; border-radius: 0 12px 12px 0; box-shadow: 2px 0 10px rgba(0,0,0,0.1)">
+    <el-aside width="240px" style="background: linear-gradient(to bottom, #e8dfc8, #d8cfb8); border-right: 1px solid #d4c9a8; border-radius: 0 12px 12px 0; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-x: hidden">
         <el-row :gutter="20">
             <div style="color: #5a4a3a; padding: 15px; font-size: 18px; font-weight: bold; display: flex; flex-direction: column; align-items: center;">
                 <div>
@@ -14,7 +14,8 @@
             background-color="#e8dfc8"
             text-color="#5a4a3a"
             active-text-color="#ffffff"
-            :default-active="'1'">
+            :default-active="'1'"
+            style="overflow-x: hidden">
             <el-menu-item @click="gotoChat" index="2" style="border-radius: 8px; margin: 0 8px; width: calc(100% - 16px)">
                 <i class="el-icon-chat-dot-round"></i>
                 <span>智能答疑</span>

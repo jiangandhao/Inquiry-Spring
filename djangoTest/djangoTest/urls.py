@@ -24,4 +24,5 @@ urlpatterns = [
     path("fileUpload/",fileUpload),
     path("chat/",chat),
     path("summarize/",summarize),
+    path("test/",test)
 ]
