@@ -57,14 +57,16 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "InquirySpring.urls"
 
+# ==================== 模板配置 ====================
+# 保留基本模板配置以支持Django Admin和API浏览器
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'templates']
-        ,
-        "APP_DIRS": True,
+        "DIRS": [],  # 不使用自定义模板目录
+        "APP_DIRS": True,  # 使用应用内置模板
         "OPTIONS": {
             "context_processors": [
+                "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
@@ -145,7 +147,6 @@ REST_FRAMEWORK = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# 静态文件配置
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
+# ==================== 静态文件配置已移除 ====================
+# 前端开发由其他团队负责，本项目专注于API设计
+# STATICFILES_DIRS = []

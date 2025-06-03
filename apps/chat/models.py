@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from apps.documents.models import Document
 
 
@@ -11,15 +12,24 @@ class Conversation(models.Model):
         ('quiz', '测验模式'),
     ]
     
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='conversations',
+        verbose_name='用户',
+        null=True,
+        blank=True
+    )
+
     document = models.ForeignKey(
-        Document, 
-        on_delete=models.CASCADE, 
+        Document,
+        on_delete=models.CASCADE,
         related_name='conversations',
         verbose_name='关联文档',
         null=True,
         blank=True
     )
-    
+
     title = models.CharField('对话标题', max_length=200, blank=True)
     mode = models.CharField('交互模式', max_length=20, choices=MODE_CHOICES, default='chat')
     
@@ -36,6 +46,11 @@ class Conversation(models.Model):
         verbose_name = '对话会话'
         verbose_name_plural = '对话会话'
         ordering = ['-updated_at']
+        indexes = [
+            models.Index(fields=['user', '-updated_at']),
+            models.Index(fields=['document', '-updated_at']),
+            models.Index(fields=['mode', '-updated_at']),
+        ]
     
     def __str__(self):
         title = self.title or f"对话-{self.id}"
@@ -82,6 +97,11 @@ class Message(models.Model):
         verbose_name = '消息'
         verbose_name_plural = '消息'
         ordering = ['conversation', 'created_at']
+        indexes = [
+            models.Index(fields=['conversation', 'created_at']),
+            models.Index(fields=['is_user', 'created_at']),
+            models.Index(fields=['created_at']),
+        ]
     
     def __str__(self):
         sender = "用户" if self.is_user else "AI"
