@@ -141,8 +141,7 @@
                                         v-for="item in options"
                                         :key="item.value"
                                         :label="item.label"
-                                        :value="item.value"
-                                        :style="answerStatus && answerStatus[i] === true ? 'border:2px solid #4caf50;background:#e8f5e9;' : (answerStatus && answerStatus[i] === false ? 'border:2px solid #f44336;background:#ffebee;' : '')">
+                                        :value="item.value">
                                         </el-option>
                                     </el-select>
                                 </span>
@@ -152,8 +151,7 @@
                                         v-for="item in options"
                                         :key="item.value"
                                         :label="item.label"
-                                        :value="item.value"
-                                        :style="answerStatus && answerStatus[i] === true ? 'border:2px solid #4caf50;background:#e8f5e9;' : (answerStatus && answerStatus[i] === false ? 'border:2px solid #f44336;background:#ffebee;' : '')">
+                                        :value="item.value">
                                         </el-option>
                                     </el-select>
                                 </span>
@@ -163,8 +161,7 @@
                                         v-for="item in options_2"
                                         :key="item.value"
                                         :label="item.label"
-                                        :value="item.value"
-                                        :style="answerStatus && answerStatus[i] === true ? 'border:2px solid #4caf50;background:#e8f5e9;' : (answerStatus && answerStatus[i] === false ? 'border:2px solid #f44336;background:#ffebee;' : '')">
+                                        :value="item.value">
                                         </el-option>
                                     </el-select>
                                 </span>
@@ -172,7 +169,6 @@
                                     <v-text-field 
                                         label="输入答案" 
                                         v-model="answer[i]"
-                                        :style="answerStatus && answerStatus[i] === true ? 'border:2px solid #4caf50;background:#e8f5e9;' : (answerStatus && answerStatus[i] === false ? 'border:2px solid #f44336;background:#ffebee;' : '')"
                                     ></v-text-field>
                                 </span>
                                

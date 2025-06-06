@@ -1,15 +1,36 @@
-<template>
+<!-- <template>
   <div>
     <div class="markdown-container" v-html="markMessage(md)"></div>
     <div>
-      <v-combobox
-        clearable
-        dense
-        filled
-        hide-selected
-        multiple
-        small-chips
-      ></v-combobox>
+      <v-card>
+        <v-container fluid>
+          <v-row>
+            <v-col cols="12">
+              <v-combobox
+                v-model="value"
+                :items="items"
+                label="Default"
+              ></v-combobox>
+            </v-col>
+            <v-col cols="12">
+              <v-combobox
+                v-model="value"
+                :items="items"
+                density="comfortable"
+                label="Comfortable"
+              ></v-combobox>
+            </v-col>
+            <v-col cols="12">
+              <v-combobox
+                v-model="value"
+                :items="items"
+                density="compact"
+                label="Compact"
+              ></v-combobox>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card>
     </div>
   </div>
   
@@ -65,7 +86,6 @@ import hljs from 'highlight.js';
 import 'highlight.js/styles/github.css';
 import "highlight.js/styles/paraiso-light.css";
 
-
 export default {
  data(){
    return {
@@ -109,4 +129,37 @@ export default {
     },
  }
 }
+</script> -->
+
+<template>
+  <v-container fluid>
+    <v-row>
+      <v-col cols="12">
+        <v-combobox
+          v-model="select"
+          :items="items"
+          label="Combobox"
+          multiple
+          outlined
+          dense
+        ></v-combobox>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
+
+<script>
+  export default {
+    data () {
+      return {
+        select: ['Vuetify', 'Programming'],
+        items: [
+          'Programming',
+          'Design',
+          'Vue',
+          'Vuetify',
+        ],
+      }
+    },
+  }
 </script>

@@ -17,7 +17,7 @@ def chat(request):
         responseDict={'AIMessage':''}
         #############在此处装入AI的回复信息##############
         responseDict['AIMessage']="""
-### **查新点**  
+### **创新点**  
 
 本项目在**混合RAG架构、多模式交互、微服务架构、知识库管理和应用创新**五个方面提出了一系列创新技术方案，经检索分析，核心查新点如下：  
 
@@ -71,51 +71,46 @@ def summarize(request):
         ############# 在此处装入AI的回复信息 ###############
         responseDict['AIMessage'] = """
 ### **论文详细总结：Big Data Quality: A Survey**  
-
-#### **1. 研究背景与动机**  
-> "Quality has been recognized by the Big Data community as an essential facet of its maturity... should be implemented at the earlier stages of its lifecycle"  
-> **原文位置**：Abstract（Page 1）  
-
+#### **1. 研究背景与动机**    
 - 大数据时代下，数据量激增（如每日生成2.5 EB数据，Page 2），传统数据质量管理方法无法应对其动态性、多样性和规模（Page 1-2）。  
 - 质量管理的必要性：低质量数据会导致分析结果偏差（Page 1）。  
 
+> "Quality has been recognized by the Big Data community as an essential facet of its maturity... should be implemented at the earlier stages of its lifecycle"  
+> **原文位置**：Abstract（Page 1）
 ---
 
 #### **2. 大数据与数据质量基础**  
 ##### **2.1 大数据定义与特征**  
-> "Big Data is high-volume, high-velocity and high-variety information assets"  
-> **原文位置**：II.A.1 Definition（Page 2）  
-
 - **3V特性**（Volume, Velocity, Variety）：  
   - **Volume**：数据规模（如2020年达35 ZB，Page 2）。  
   - **Velocity**：实时或批处理生成（Figure 2, Page 3）。  
   - **Variety**：结构化与非结构化数据混合（Page 2）。  
 - **扩展特性**：真实性（Veracity）、价值（Value）等（Page 3）。  
 
-##### **2.2 大数据生命周期**  
-> "Big Data lifecycle includes: data generation, collection, transportation, storage, preprocessing, analytics, and visualization"  
-> **原文位置**：II.C（Page 3-4）  
+> "Big Data is high-volume, high-velocity and high-variety information assets"  
+> **原文位置**：II.A.1 Definition（Page 2）  
 
+##### **2.2 大数据生命周期**  
 - **关键阶段**（Figure 3, Page 4）：  
   1. **数据生成**：传感器、社交媒体等（Page 3）。  
   2. **预处理**：清洗、去重、格式转换（Page 4）。  
   3. **分析**：机器学习、深度学习（Page 4）。  
 
-##### **2.3 数据质量（DQ）核心概念**  
-> "Data quality is 'fitness for use'"  
-> **原文位置**：II.D.1 Definition（Page 4）  
+> "Big Data lifecycle includes: data generation, collection, transportation, storage, preprocessing, analytics, and visualization"  
+> **原文位置**：II.C（Page 3-4）  
 
+##### **2.3 数据质量（DQ）核心概念**  
 - **质量维度（DQDs）**（Figure 4, Page 5）：  
   - **内在维度**：准确性（Accuracy）、一致性（Consistency）。  
   - **上下文维度**：时效性（Timeliness）。  
 - **评估方法**：通过指标（如缺失值比率）量化（Page 5）。  
 
+> "Data quality is 'fitness for use'"  
+> **原文位置**：II.D.1 Definition（Page 4） 
+
 ---
 
 #### **3. 大数据质量管理框架**  
-> "We propose a holistic quality management model... across the Big Data value chain"  
-> **原文位置**：III（Page 5-7）  
-
 - **全生命周期管理**（Figure 5, Page 6）：  
   1. **数据采集**：过程驱动策略（Page 6）。  
   2. **传输与存储**：QoS保障（如带宽、容错，Page 7）。  
@@ -123,12 +118,12 @@ def summarize(request):
   4. **可视化**：工具质量评估（Page 7）。  
 - **持续改进**：通过质量报告反馈（Page 7）。  
 
+> "We propose a holistic quality management model... across the Big Data value chain"  
+> **原文位置**：III（Page 5-7）
+
 ---
 
 #### **4. 研究分类与挑战**  
-> "Most existing works address quality in an ad hoc manner... no comprehensive model"  
-> **原文位置**：IV（Page 7-8）  
-
 - **研究分类**（Figure 6, Page 7）：  
   - **生命周期管理**（I-III）：聚焦预处理、存储（Page 8）。  
   - **质量维度**（VII-IX）：如准确性、一致性（Page 8）。  
@@ -136,24 +131,27 @@ def summarize(request):
   - 缺乏实时监控工具（Page 9）。  
   - 非结构化数据质量评估困难（Page 9）。  
 
+> "Most existing works address quality in an ad hoc manner... no comprehensive model"  
+> **原文位置**：IV（Page 7-8）
+
 ---
 
 #### **5. 未来方向**  
-> "Future research should develop... end-to-end quality integration"  
-> **原文位置**：V（Page 9）  
-
 - **研究方向**：  
   - 动态质量指标（Page 9）。  
   - 自动化实时仪表盘（Page 9）。  
   - 标准化框架（Page 9）。  
 
+> "Future research should develop... end-to-end quality integration"  
+> **原文位置**：V（Page 9）  
+
 ---
 
 #### **6. 结论**  
+- 质量管理需贯穿全生命周期，需跨学科合作（Page 9）。  
+
 > "Big Data quality is the key for its acceptance... conventional techniques are no longer suitable"  
 > **原文位置**：VI（Page 9）  
-
-- 质量管理需贯穿全生命周期，需跨学科合作（Page 9）。  
 
 ---
 

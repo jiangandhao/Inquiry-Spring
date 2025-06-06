@@ -334,12 +334,12 @@ export default {
             const line = this.typingLines[this.lineIdx];
             if (this.currentLine.length < line.length) {
                 this.currentLine += line[this.currentLine.length];
-                this.typingTimer = setTimeout(this.typeNextChar, 28);
+                this.typingTimer = setTimeout(this.typeNextChar, 10);
             } else {
                 this.displayLines.push(this.currentLine);
                 this.currentLine = '';
                 this.lineIdx++;
-                this.typingTimer = setTimeout(this.typeNextChar, 180);
+                this.typingTimer = setTimeout(this.typeNextChar, 120);
             }
         },
         generateSummary(){
