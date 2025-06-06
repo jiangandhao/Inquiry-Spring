@@ -49,17 +49,36 @@
                             </h3>
                             <div style="flex: 1; display: flex; flex-direction: column;">
                                 <el-upload
-                                class="upload-demo"
-                                drag
-                                :action=this.url
-                                multiple
-                                :on-success="handleUploadSuccess"
-                                :before-upload="beforeUpload"
-                                style="flex: 1; display: flex; flex-direction: column;">
-                                <i class="el-icon-upload" style="color: #8b7355; font-size: 48px; margin-bottom: 16px;"></i>
-                                <div class="el-upload__text" style="color: #5a4a3a; font-size: 14px;">将文件拖到此处，或<em style="color: #8b7355;">点击上传</em></div>
-                                <div class="el-upload__tip" slot="tip" style="color: #8b7355; margin-top: 16px;">支持word,pdf格式</div>
+                                    class="upload-demo"
+                                    show-file-list="false"
+                                    drag
+                                    :action=this.url
+                                    multiple
+                                    :on-success="handleUploadSuccess"
+                                    :before-upload="beforeUpload"
+                                    style="flex: 1; display: flex; flex-direction: column;">
+                                    <i class="el-icon-upload" style="color: #8b7355; font-size: 48px; margin-bottom: 16px;"></i>
+                                    <div class="el-upload__text" style="color: #5a4a3a; font-size: 14px;">将文件拖到此处，或<em style="color: #8b7355;">点击上传</em></div>
+                                    <div class="el-upload__tip" slot="tip" style="color: #8b7355; margin-top: 16px;">支持word,pdf格式</div>
                                 </el-upload>
+                                <!-- 新增：已上传文件表格，单独分区 -->
+                                <div v-if="uploadedFiles.length" style="margin: 50px auto 0 auto; padding: 16px 12px; background: #f8f6f2; border-radius: 8px; box-shadow: 0 2px 8px rgba(139,115,85,0.06); border: 1px solid #e8dfc8; width: 95%; max-width: 600px; min-width: 220px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
+                                    <div style="font-weight: bold; color: #8b7355; margin-bottom: 10px; font-size: 15px; letter-spacing: 1px; width: 100%; text-align: left;">当前项目文档</div>
+                                    <el-table 
+                                        :data="uploadedFiles" 
+                                        border 
+                                        style="width: 100%; background: #fff;"
+                                        highlight-current-row
+                                        @current-change="handleFileRowSelect"
+                                        :current-row="selectedFileRow"
+                                    >
+                                        <el-table-column prop="name" label="文件名" min-width="120" align="left">
+                                            <template slot-scope="scope">
+                                                <i class="el-icon-document" style="margin-right: 6px; color: #8b7355;"></i>{{ scope.row.name }}
+                                            </template>
+                                        </el-table-column>
+                                    </el-table>
+                                </div>
                                 <v-btn @click="generateSummary" color="#8b7355" style="color: white; margin-top: 20px; align-self: flex-end;">
                                     立即生成
                                 </v-btn>
@@ -250,7 +269,11 @@ export default {
             typingTimer: null,
             lineIdx: 0,
             typingLines: [],
-            loading: false // 新增加载动画状态
+            loading: false, // 新增加载动画状态
+            uploadedFiles: [{ name: "ccf2012-b.pdf" }], // 新增：已上传文件列表
+            // currentFiles:["Big_Data_Quality_A_Survey.pdf"],
+            selectedFileRow: null, // 新增：当前选中的文件行对象
+            selectedFileName: '' // 新增：当前选中文件名
         }
     },
     mounted() {
@@ -312,6 +335,14 @@ export default {
         handleUploadSuccess(response, file) {
             console.log(response.data)
             this.$message.success(`${file.name} 上传成功`);
+            // 新增：添加到已上传文件列表
+            this.uploadedFiles.push({ name: file.name });
+        },
+
+        // 处理文件行选择
+        handleFileRowSelect(row) {
+            this.selectedFileRow = row;
+            this.selectedFileName = row ? row.name : '';
         },
 
         startLineAnimation(msg) {
@@ -343,10 +374,15 @@ export default {
             }
         },
         generateSummary(){
+            //window.alert(JSON.stringify(this.selectedFileName))
             this.loading = true;
             setTimeout(() => {
-                axios.get(this.url).then((response)=>{
-                    this.summarizeMsg=response.data.AIMessage;
+                axios.get(this.url, {
+                    params: {
+                        fileName: this.selectedFileName
+                    }
+                }).then((response) => {
+                    this.summarizeMsg = response.data.AIMessage;
                     this.loading = false;
                     this.startLineAnimation(this.summarizeMsg);
                 })
@@ -354,7 +390,7 @@ export default {
                     this.loading = false;
                     this.$message.error('获取AI回复失败:' + error.message);
                 });
-            }, 5000);
+            }, 15000);
         },
     }
 };

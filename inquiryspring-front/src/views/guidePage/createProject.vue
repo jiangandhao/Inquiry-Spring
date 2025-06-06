@@ -196,7 +196,7 @@ export default {
           files: []
         };
         this.isSubmitting = false;
-      }, 1000);
+      }, 3000);
     },
     // 打开项目
     openProject(row) {

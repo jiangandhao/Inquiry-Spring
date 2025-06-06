@@ -70,6 +70,20 @@
                         resize="none"
                         style="flex: 1; border-radius: 24px; padding: 12px 20px;">
                     </el-input>
+                    <el-button
+                        type="default"
+                        style="background: linear-gradient(135deg, #f5f1e8 0%, #e8dfc8 100%); border: none; border-radius: 24px; padding: 12px 24px; font-weight: 500; letter-spacing: 1px; box-shadow: 0 2px 6px rgba(139, 115, 85, 0.15); transition: all 0.3s ease; height: 48px; color: #8b7355; min-width: 90px; font-size: 15px; margin-left: 0; display: flex; align-items: center; justify-content: center;"
+                        @click="triggerFileInput"
+                    >
+                        <i class="el-icon-folder-add" style="font-size: 26px; vertical-align: middle; display: flex; align-items: center; justify-content: center; width: 100%;"></i>
+                    </el-button>
+                    <input
+                        ref="fileInput"
+                        type="file"
+                        style="display: none;"
+                        @change="handleFileChange"
+                    />
+                    <span v-if="selectedFileName" style="color: #8b7355; font-size: 14px; margin-left: 4px; margin-right: 8px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block;">{{ selectedFileName }}</span>
                     <el-button 
                         type="primary" 
                         style="background: linear-gradient(135deg, #8b7355 0%, #a0866b 100%);
@@ -274,6 +288,25 @@ import axios from 'axios';
 import { Marked } from 'marked'
 import { markedHighlight } from "marked-highlight";
 import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+import python from 'highlight.js/lib/languages/python';
+import java from 'highlight.js/lib/languages/java';
+import xml from 'highlight.js/lib/languages/xml';
+import json from 'highlight.js/lib/languages/json';
+import css from 'highlight.js/lib/languages/css';
+import markdown from 'highlight.js/lib/languages/markdown';
+import bash from 'highlight.js/lib/languages/bash';
+import 'highlight.js/styles/github.css'; // 推荐风格，可换为其它
+
+// 注册常用语言
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('python', python);
+hljs.registerLanguage('java', java);
+hljs.registerLanguage('xml', xml);
+hljs.registerLanguage('json', json);
+hljs.registerLanguage('css', css);
+hljs.registerLanguage('markdown', markdown);
+hljs.registerLanguage('bash', bash);
 
 export default {
     data() {
@@ -291,8 +324,24 @@ export default {
             aiTypingTimer: null,
             aiTypingLineIdx: 0,
             aiTypingCharIdx: 0,
-            aiTypingLines: []
+            aiTypingLines: [],
+            selectedFile: null,
+            selectedFileName: '' // 新增：存储选中文件名
         }
+    },
+    created() {
+        // 页面加载时从store恢复历史
+        const history = this.$store.getters.getChatHistory;
+        if (history && Array.isArray(history) && history.length > 0) {
+            this.messages = history.map(msg => ({...msg, timestamp: new Date(msg.timestamp)}));
+        }
+    },
+    mounted() {
+        // 页面初次渲染后自动滚动到底部
+        this.$nextTick(() => {
+            const container = document.querySelector('.message-list');
+            if (container) container.scrollTop = container.scrollHeight;
+        });
     },
     computed: {
         aiTypingHtml() {
@@ -301,6 +350,18 @@ export default {
                 arr.push(this.aiCurrentLineText + '<span class="typing-cursor">|</span>');
             }
             return this.markdownToHtml(arr.join('\n'));
+        }
+    },
+    watch: {
+        messages: {
+            handler(newVal) {
+                // 每次对话变更都保存到store
+                this.$store.dispatch('updateChatHistory', newVal.map(msg => ({
+                    ...msg,
+                    timestamp: msg.timestamp instanceof Date ? msg.timestamp.toISOString() : msg.timestamp
+                })));
+            },
+            deep: true
         }
     },
     methods: {
@@ -316,64 +377,31 @@ export default {
                     async: false,
                     langPrefix: 'hljs language-',
                     emptyLangClass: 'no-lang',
-                    highlight: (code) => {
-                        return hljs.highlightAuto(code).value
+                    highlight: (code, lang) => {
+                        if (lang && hljs.getLanguage(lang)) {
+                            return hljs.highlight(code, { language: lang }).value;
+                        }
+                        return hljs.highlightAuto(code).value;
                     }
                 })
             );
             return marked.parse(message);
-        },
-        startAiTypingAnimation(aiText) {
-            if (this.aiTypingTimer) {
-                clearTimeout(this.aiTypingTimer);
-                this.aiTypingTimer = null;
-            }
-            this.aiTyping = true;
-            this.aiDisplayLines = [];
-            this.aiCurrentLineText = '';
-            this.aiTypingLineIdx = 0;
-            this.aiTypingCharIdx = 0;
-            this.aiTypingLines = aiText.split(/\r?\n/);
-            this.typeAiNextChar();
-        },
-        typeAiNextChar() {
-            if (this.aiTypingLineIdx >= this.aiTypingLines.length) {
-                this.aiCurrentLineText = '';
-                this.aiTyping = false;
-                // 动画结束后将AI消息push到messages
-                this.messages.push({
-                    text: this.aiTypingLines.join('\n'),
-                    isUser: false,
-                    timestamp: new Date()
-                });
-                this.$nextTick(() => {
-                    const container = document.querySelector('.message-list');
-                    if (container) container.scrollTop = container.scrollHeight;
-                });
-                return;
-            }
-            const line = this.aiTypingLines[this.aiTypingLineIdx];
-            if (this.aiTypingCharIdx < line.length) {
-                this.aiCurrentLineText += line[this.aiTypingCharIdx];
-                this.aiTypingCharIdx++;
-                this.aiTypingTimer = setTimeout(this.typeAiNextChar, 28);
-            } else {
-                this.aiDisplayLines.push(this.aiCurrentLineText);
-                this.aiCurrentLineText = '';
-                this.aiTypingLineIdx++;
-                this.aiTypingCharIdx = 0;
-                this.aiTypingTimer = setTimeout(this.typeAiNextChar, 180);
-            }
         },
         sendMessage() {
             if (this.inputMessage.trim() === '') return;
             this.form.message = this.inputMessage;
             this.form.timestamp = new Date();
             // 添加用户消息
-            this.messages.push({
+            const userMsg = {
                 text: this.inputMessage,
                 isUser: true,
                 timestamp: this.form.timestamp
+            };
+            this.messages.push(userMsg);
+            // 同步到store
+            this.$store.dispatch('addChatMessage', {
+                ...userMsg,
+                timestamp: userMsg.timestamp.toISOString()
             });
             this.inputMessage = '';
             this.$nextTick(() => {
@@ -403,7 +431,55 @@ export default {
                     this.$message.error('获取AI回复失败:' + error.message);
                     this.aiTyping = false;
                 });
-            }, 1000);
+            }, 20000);
+        },
+        startAiTypingAnimation(aiText) {
+            if (this.aiTypingTimer) {
+                clearTimeout(this.aiTypingTimer);
+                this.aiTypingTimer = null;
+            }
+            this.aiTyping = true;
+            this.aiDisplayLines = [];
+            this.aiCurrentLineText = '';
+            this.aiTypingLineIdx = 0;
+            this.aiTypingCharIdx = 0;
+            this.aiTypingLines = aiText.split(/\r?\n/);
+            this.typeAiNextChar();
+        },
+        typeAiNextChar() {
+            if (this.aiTypingLineIdx >= this.aiTypingLines.length) {
+                this.aiCurrentLineText = '';
+                this.aiTyping = false;
+                // 动画结束后将AI消息push到messages
+                const aiMsg = {
+                    text: this.aiTypingLines.join('\n'),
+                    isUser: false,
+                    timestamp: new Date()
+                };
+                this.messages.push(aiMsg);
+                // 同步到store
+                this.$store.dispatch('addChatMessage', {
+                    ...aiMsg,
+                    timestamp: aiMsg.timestamp.toISOString()
+                });
+                this.$nextTick(() => {
+                    const container = document.querySelector('.message-list');
+                    if (container) container.scrollTop = container.scrollHeight;
+                });
+                return;
+            }
+            const line = this.aiTypingLines[this.aiTypingLineIdx];
+            if (this.aiTypingCharIdx < line.length) {
+                this.aiCurrentLineText += line[this.aiTypingCharIdx];
+                this.aiTypingCharIdx++;
+                this.aiTypingTimer = setTimeout(this.typeAiNextChar, 28);
+            } else {
+                this.aiDisplayLines.push(this.aiCurrentLineText);
+                this.aiCurrentLineText = '';
+                this.aiTypingLineIdx++;
+                this.aiTypingCharIdx = 0;
+                this.aiTypingTimer = setTimeout(this.typeAiNextChar, 180);
+            }
         },
         formatTime(date) {
             return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
@@ -416,6 +492,19 @@ export default {
         },
         gotoPrj(){
             this.$router.push({ path: '/project' });
+        },
+        triggerFileInput() {
+            this.$refs.fileInput.click();
+        },
+        handleFileChange(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.selectedFile = file;
+                this.selectedFileName = file.name;
+            } else {
+                this.selectedFile = null;
+                this.selectedFileName = '';
+            }
         }
     }
 };

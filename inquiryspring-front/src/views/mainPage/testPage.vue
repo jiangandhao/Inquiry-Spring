@@ -380,7 +380,7 @@ export default {
                 }).finally(() => {
                     this.loading = false; // 加载结束，隐藏动画
                 });
-            }, 5000);
+            }, 15000);
         },
         submitAns() {
             // window.alert(JSON.stringify(this.answer[4]))
