@@ -1,5 +1,18 @@
 <template>
-  <div class="markdown-container" v-html="markMessage(md)"></div>
+  <div>
+    <div class="markdown-container" v-html="markMessage(md)"></div>
+    <div>
+      <v-combobox
+        clearable
+        dense
+        filled
+        hide-selected
+        multiple
+        small-chips
+      ></v-combobox>
+    </div>
+  </div>
+  
 </template>
 
 <style scoped>

@@ -135,11 +135,47 @@
                                 </div>
                             </el-row>
                             <el-row>
-                                <v-text-field 
-                                    label="输入答案" 
-                                    v-model="answer[i]"
-                                    :style="answerStatus && answerStatus[i] === true ? 'border:2px solid #4caf50;background:#e8f5e9;' : (answerStatus && answerStatus[i] === false ? 'border:2px solid #f44336;background:#ffebee;' : '')"
-                                ></v-text-field>
+                                <span v-if="question[i]?.type==='单选题'">
+                                    <el-select v-model="answer[i]" placeholder="请选择" style="margin-top: 15px;">
+                                        <el-option
+                                        v-for="item in options"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value"
+                                        :style="answerStatus && answerStatus[i] === true ? 'border:2px solid #4caf50;background:#e8f5e9;' : (answerStatus && answerStatus[i] === false ? 'border:2px solid #f44336;background:#ffebee;' : '')">
+                                        </el-option>
+                                    </el-select>
+                                </span>
+                                <span v-else-if="question[i]?.type==='多选题'">
+                                    <el-select v-model="answer[i]" multiple placeholder="请选择" style="margin-top: 15px;">
+                                        <el-option
+                                        v-for="item in options"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value"
+                                        :style="answerStatus && answerStatus[i] === true ? 'border:2px solid #4caf50;background:#e8f5e9;' : (answerStatus && answerStatus[i] === false ? 'border:2px solid #f44336;background:#ffebee;' : '')">
+                                        </el-option>
+                                    </el-select>
+                                </span>
+                                <span v-else-if="question[i]?.type==='判断题'">
+                                    <el-select v-model="answer[i]" placeholder="请选择" style="margin-top: 15px;">
+                                        <el-option
+                                        v-for="item in options_2"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value"
+                                        :style="answerStatus && answerStatus[i] === true ? 'border:2px solid #4caf50;background:#e8f5e9;' : (answerStatus && answerStatus[i] === false ? 'border:2px solid #f44336;background:#ffebee;' : '')">
+                                        </el-option>
+                                    </el-select>
+                                </span>
+                                <span v-else-if="question[i]?.type==='填空题'" style="margin-top: 15px;">
+                                    <v-text-field 
+                                        label="输入答案" 
+                                        v-model="answer[i]"
+                                        :style="answerStatus && answerStatus[i] === true ? 'border:2px solid #4caf50;background:#e8f5e9;' : (answerStatus && answerStatus[i] === false ? 'border:2px solid #f44336;background:#ffebee;' : '')"
+                                    ></v-text-field>
+                                </span>
+                               
                                 <span v-if="answerStatus && answerStatus[i] === true" style="color:#4caf50;margin-left:10px;">✔ 正确</span>
                                 <span v-else-if="answerStatus && answerStatus[i] === false" style="color:#f44336;margin-left:10px;">✘ 错误，正确答案：{{ question[i].answer }}</span>
                             </el-row>
@@ -251,6 +287,26 @@ export default {
                 desc:""
             },
             q:"ddd",
+            options: [{
+                value: 'A',
+                label: 'A'
+                }, {
+                value: 'B',
+                label: 'B'
+                }, {
+                value: 'C',
+                label: 'C'
+                }, {
+                value: 'D',
+                label: 'D'
+                }],
+            options_2: [{
+                value: '正确',
+                label: '正确'
+                }, {
+                value: '错误',
+                label: '错误'
+                }],
             question:[
                 {
                     type:"单选题",
@@ -301,6 +357,9 @@ export default {
             this.panel = []
         },
         generateTest(){
+            this.answerStatus=[], // 答案正误状态
+            this.showAnalysis=[], // 控制每题解析显示
+            this.answer=[], // 初始化答案数组
             this.loading = true; // 开始加载动画
             this.items = this.testReq.num;
             if(this.items > 0){
@@ -328,10 +387,21 @@ export default {
             }, 5000);
         },
         submitAns() {
-            // window.alert(JSON.stringify(this.answer))
+            // window.alert(JSON.stringify(this.answer[4]))
+            this.answerStatus=[], // 答案正误状态
+            this.showAnalysis=[], // 控制每题解析显示
             // 答案核对
             this.answerStatus = this.question.map((q, i) => {
-                if (typeof this.answer[i] !== 'string') return false;
+                if (typeof this.answer[i] !== 'string'){
+                    if(typeof this.answer[i] === 'object'){
+                        this.answer[i] = this.answer[i].slice().sort();
+                        for(let index=0; index < this.answer[i].length; index++){
+                            if(this.answer[i][index]!=q.answer[index]) return false;
+                        }
+                        return true;
+                    }
+                    else return false;
+                }
                 return this.answer[i].trim() === String(q.answer).trim();
             });
         },
