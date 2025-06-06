@@ -19,8 +19,8 @@
           <span>管理学习项目</span>
         </el-menu-item>
         <el-menu-item @click="unlog" index="2" style="border-radius: 8px; margin: 8px; width: calc(100% - 16px); transition: all 0.3s">
-          <i class="el-icon-chat-dot-round" style="color: #8b7355"></i>
-          <span>退出登录</span>
+          <i class="el-icon-right" style="color: #8b7355"></i>
+          <span>退出</span>
         </el-menu-item>
       </el-menu>
     </el-aside>
@@ -211,7 +211,8 @@ export default {
     },
     // 跳转到聊天页面
     unlog() {
-      window.alert('退出登录')
+      window.alert('退出')
+      this.$router.push('/')
     }
   }
 }
