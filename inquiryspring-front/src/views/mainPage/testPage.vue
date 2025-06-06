@@ -98,48 +98,75 @@
                     </div>
                 </el-col>
                 <el-col v-show="testVisible" style="padding: 20px; background: rgba(255,255,255,0.9); border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                    <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 20px;">
-                        <v-btn @click="all" color="#8b7355" style="color: white;">
-                            显示全部
-                        </v-btn>
-                        <v-btn @click="none" color="#e8dfc8" style="color: #5a4a3a;">
-                            收起
-                        </v-btn>
+                    <div v-if="loading" style="display:flex;align-items:center;justify-content:center;height:300px;">
+                        <!-- 三点跳动加载动画 -->
+                        <div class="loading-dots">
+                            <span></span><span></span><span></span>
+                        </div>
                     </div>
-
-                    <v-expansion-panels
-                    v-model="panel"
-                    multiple
-                    >
-                    <v-expansion-panel
-                        v-for="(item,i) in items"
-                        :key="i"
-                        style="margin-bottom: 10px; border: 1px solid rgba(139, 115, 85, 0.1); will-change: height;"
-                    >
-                        <v-expansion-panel-header 
-                            expand-icon="mdi-menu-down" 
-                            style="color: #5a4a3a; font-weight: 500;"
-                            :class="{'v-expansion-panel-header--active': panel.includes(i)}"
+                    <div v-else>
+                        <!-- 题目内容区域，原有内容整体包裹到这里 -->
+                        <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 20px;">
+                        </div>
+                        <v-expansion-panels
+                        v-model="panel"
+                        multiple
                         >
-                            题目 {{ item }}
-                        </v-expansion-panel-header>
-                        <v-expansion-panel-content 
-                            style="color: #5a4a3a; line-height: 1.6; padding: 15px;"
-                            v-if="panel.includes(i)"
+                        <v-expansion-panel
+                            v-for="(item,i) in items"
+                            :key="i"
+                            style="margin-bottom: 10px; border: 1px solid rgba(139, 115, 85, 0.1); will-change: height;"
                         >
-                        <el-row>
-                            <div>{{ question[i]?.type }}:</div>
-                            <div v-html="formatQuestion(question[i]?.question)"></div>
-                        </el-row>
-                        <el-row>
-                            <v-text-field label="输入答案" v-model="answer[i]"></v-text-field>
-                        </el-row>
-                        </v-expansion-panel-content>
-                    </v-expansion-panel>
-                    </v-expansion-panels>
-                    <v-btn @click="submitAns" color="#8b7355" style="color: white;">
-                        提交答案
-                    </v-btn>
+                            <v-expansion-panel-header 
+                                expand-icon="mdi-menu-down" 
+                                style="color: #5a4a3a; font-weight: 500;"
+                                :class="{'v-expansion-panel-header--active': panel.includes(i)}"
+                            >
+                                题目 {{ item }}
+                            </v-expansion-panel-header>
+                            <v-expansion-panel-content 
+                                style="color: #5a4a3a; line-height: 1.6; padding: 15px;"
+                                v-if="panel.includes(i)"
+                            >
+                            <el-row>
+                                <div style="flex:1;">
+                                    <div v-html="markMessage(question[i]?.type ? ('**' + question[i].type + '**') : '')"></div>
+                                    <div v-html="markMessage(question[i]?.question)"></div>
+                                </div>
+                            </el-row>
+                            <el-row>
+                                <v-text-field 
+                                    label="输入答案" 
+                                    v-model="answer[i]"
+                                    :style="answerStatus && answerStatus[i] === true ? 'border:2px solid #4caf50;background:#e8f5e9;' : (answerStatus && answerStatus[i] === false ? 'border:2px solid #f44336;background:#ffebee;' : '')"
+                                ></v-text-field>
+                                <span v-if="answerStatus && answerStatus[i] === true" style="color:#4caf50;margin-left:10px;">✔ 正确</span>
+                                <span v-else-if="answerStatus && answerStatus[i] === false" style="color:#f44336;margin-left:10px;">✘ 错误，正确答案：{{ question[i].answer }}</span>
+                            </el-row>
+                            <el-row v-if="showAnalysis && showAnalysis[i]">
+                                <div style="margin-top: 10px; color: #8b7355;">
+                                    <strong>解析:</strong>
+                                    <div v-html="markMessage(question[i].analysis)"></div>
+                                </div>
+                            </el-row>
+                            </v-expansion-panel-content>
+                        </v-expansion-panel>
+                        </v-expansion-panels>
+                        <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 20px;">
+                            <v-btn v-if="panel.length < items" @click="all" color="#8b7355" style="color: white;">
+                                全部展开
+                            </v-btn>
+                            <v-btn v-else @click="none" color="#e8dfc8" style="color: #5a4a3a;">
+                                收起
+                            </v-btn>
+                            <v-btn @click="submitAns" color="#8b7355" style="color: white;">
+                                提交答案
+                            </v-btn>
+                            <v-btn @click="getAnalysis" color="#8b7355" style="color: white;">
+                                查看解析
+                            </v-btn>
+                        </div>
+                    </div>
                 </el-col>
             </div>
         </el-main>
@@ -176,10 +203,40 @@
     .el-menu-item.is-active i {
         color: white !important;
     }
+
+    .loading-dots {
+        display: flex;
+        gap: 8px;
+    }
+
+    .loading-dots span {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        background: #8b7355;
+        border-radius: 50%;
+        animation: bounce 1.2s infinite both;
+    }
+
+    .loading-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .loading-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+        0%, 80%, 100% { transform: scale(1); }
+        40% { transform: scale(1.5); }
+    }
 </style>
 
 <script>
 import axios from 'axios';
+import { Marked } from 'marked'
+import { markedHighlight } from "marked-highlight";
+import hljs from 'highlight.js/lib/core';
 
 export default {
     data() {
@@ -197,22 +254,33 @@ export default {
             question:[
                 {
                     type:"单选题",
-                    question:"1+1=?"
+                    question:"1+1=?",
+                    answer:"2",
+                    analysis:"2是正确的答案"
                 },
                 {
                     type:"多选题",
-                    question:"2+2=?"
+                    question:"2+2=?",
+                    answer:"4",
+                    analysis:"4是正确的答案"
                 },
                 {
                     type:"判断题",
-                    question:"3>2?"
+                    question:"3>2?",
+                    answer:"是",
+                    analysis:"3大于2"
                 },
                 {
                     type:"填空题",
-                    question:"4-1=?"
+                    question:"4-1=?",
+                    answer:"3",
+                    analysis:"3是正确的答案"
                 }
             ],
-            answer: ["", "", "", ""] // 初始化答案数组
+            answer: [], // 初始化答案数组
+            answerStatus: [], // 答案正误状态
+            showAnalysis: [], // 控制每题解析显示
+            loading: false // 是否显示加载动画
         }
     },
     methods: {
@@ -233,22 +301,66 @@ export default {
             this.panel = []
         },
         generateTest(){
-            window.alert(JSON.stringify(this.testReq))
-            this.items=this.testReq.num
-            if(this.items>0){
-                this.testVisible=true
+            this.loading = true; // 开始加载动画
+            this.items = this.testReq.num;
+            if(this.items > 0){
+                this.testVisible = true;
             }
-            axios.post('/api/test/',this.testReq).then(res=>{
-                this.question=res.data.AIQuestion;
-            })
-        
+            setTimeout(() => { // 模拟5秒加载
+                axios.post('/api/test/', this.testReq).then(res => {
+                    this.question = res.data.AIQuestion;
+                    this.showAnalysis = this.question.map(() => false); // 生成新题后重置解析显示
+                    // --- 展开动画 ---
+                    this.panel = [];
+                    let idx = 0;
+                    const total = this.question.length;
+                    const expandTimer = setInterval(() => {
+                        if(idx < total) {
+                            this.panel.push(idx);
+                            idx++;
+                        } else {
+                            clearInterval(expandTimer);
+                        }
+                    }, 120); // 每120ms展开一个
+                }).finally(() => {
+                    this.loading = false; // 加载结束，隐藏动画
+                });
+            }, 5000);
         },
-        submitAns(){
-            window.alert(this.answer[0])
+        submitAns() {
+            // window.alert(JSON.stringify(this.answer))
+            // 答案核对
+            this.answerStatus = this.question.map((q, i) => {
+                if (typeof this.answer[i] !== 'string') return false;
+                return this.answer[i].trim() === String(q.answer).trim();
+            });
         },
         formatQuestion(q) {
             if (!q) return '';
             return q.replace(/\n/g, '<br>');
+        },
+        getAnalysis() {
+            // 显示所有题目的解析
+            this.showAnalysis = this.question.map(() => true);
+        },
+        markMessage(message) {
+            if (!message) return '';
+            const marked = new Marked(
+                markedHighlight({
+                    pedantic: false,
+                    gfm: true,
+                    breaks: true,
+                    smartLists: true,
+                    xhtml: true,
+                    async: false,
+                    langPrefix: 'hljs language-',
+                    emptyLangClass: 'no-lang',
+                    highlight: (code) => {
+                        return hljs.highlightAuto(code).value
+                    }
+                })
+            );
+            return marked.parse(message);
         },
     }
 };

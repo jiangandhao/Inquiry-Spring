@@ -71,7 +71,7 @@
                 style="width: 80%;">
                 <i class="el-icon-upload" style="color: #8b7355; font-size: 48px;"></i>
                 <div class="el-upload__text" style="color: #5a4a3a;">将文件拖到此处，或<em style="color: #8b7355;">点击上传</em></div>
-                <div class="el-upload__tip" slot="tip" style="color: #8b7355;">支持word/pdf/txt格式，不超过10MB</div>
+                <div class="el-upload__tip" slot="tip" style="color: #8b7355;">支持word/pdf/txt格式</div>
               </el-upload>
             </el-form-item>
 

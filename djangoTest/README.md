@@ -21,4 +21,4 @@
 | `/summarize/`     | POST   | 文件上传（字段名：`file`）        | 文本：`ok`                                 | 总结模式：上传用户文件并处理         |
 | `/summarize/`     | GET    | 无                               | JSON：`{"AIMessage": "这是来自后端的AI总结"}`     | 总结模式：获取AI总结             |
 |   `/test/`          |  POST |  JSON:`{"num":"","type":"","level":"","desc":""}` | JSON:`{"AIQuestion":[{"type":"","question":""},{},{},...]}` | 小测模式：生成测试 |
-| `/test/` | POST | 文件上传（字段名：`file`） | 文本：`ok` | 小测模式：上传文件 |·
+| `/test/` | POST | 文件上传（字段名：`file`） | 文本：`ok` | 小测模式：上传文件 |

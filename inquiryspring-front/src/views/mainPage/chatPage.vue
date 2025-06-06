@@ -42,8 +42,22 @@
                         v-for="(message, index) in messages" 
                         :key="index" 
                         :class="['message-bubble', message.isUser ? 'user-message' : 'ai-message']">
-                        <div class="message-content">{{ message.text }}</div>
+                        <div class="message-content" v-html="markdownToHtml(message.text)"></div>
                         <div class="message-time">{{ formatTime(message.timestamp) }}</div>
+                    </div>
+                    <!-- AI动画气泡 -->
+                    <div v-if="aiTyping" class="message-bubble ai-message">
+                        <div class="message-content">
+                            <template v-if="aiTypingLines.length > 0">
+                                <div v-html="aiTypingHtml"></div>
+                            </template>
+                            <template v-else>
+                                <span class="ai-loading">
+                                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                                </span>
+                            </template>
+                        </div>
+                        <div class="message-time">问泉</div>
                     </div>
                 </div>
                 <div class="input-area" style="display: flex; gap: 10px; align-items: center;">
@@ -150,7 +164,7 @@
     
     .message-bubble {
         max-width: 80%;
-        padding: 14px 18px;
+        padding: 22px 28px; /* 增大留白 */
         border-radius: 14px;
         position: relative;
         word-break: break-word;
@@ -216,73 +230,178 @@
     .send-button:not(:disabled):active {
         transform: scale(0.98);
     }
+
+    .typing-cursor {
+      display: inline-block;
+      width: 1ch;
+      animation: blink 1s steps(1) infinite;
+      color: #8b7355;
+    }
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    .ai-loading {
+      display: inline-block;
+      min-width: 36px;
+      height: 22px;
+      vertical-align: middle;
+    }
+    .ai-loading .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin: 0 2px;
+      background: #8b7355;
+      border-radius: 50%;
+      animation: ai-bounce 1.2s infinite both;
+    }
+    .ai-loading .dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .ai-loading .dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    @keyframes ai-bounce {
+      0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
+      40% { transform: scale(1.2); opacity: 1; }
+    }
 </style>
 
 <script>
 import axios from 'axios';
+import { Marked } from 'marked'
+import { markedHighlight } from "marked-highlight";
+import hljs from 'highlight.js/lib/core';
 
 export default {
     data() {
         return {
-            url:this.HOST+'/chat/',
+            url: this.HOST + '/chat/',
             inputMessage: '',
             messages: [],
-            form:{
-                message:'',
-                timestamp:''
+            form: {
+                message: '',
+                timestamp: ''
+            },
+            aiTyping: false,
+            aiDisplayLines: [], // AI动画用
+            aiCurrentLineText: '',
+            aiTypingTimer: null,
+            aiTypingLineIdx: 0,
+            aiTypingCharIdx: 0,
+            aiTypingLines: []
+        }
+    },
+    computed: {
+        aiTypingHtml() {
+            let arr = this.aiDisplayLines.slice();
+            if (this.aiCurrentLineText) {
+                arr.push(this.aiCurrentLineText + '<span class="typing-cursor">|</span>');
             }
+            return this.markdownToHtml(arr.join('\n'));
         }
     },
     methods: {
+        markdownToHtml(message) {
+            if (!message) return '';
+            const marked = new Marked(
+                markedHighlight({
+                    pedantic: false,
+                    gfm: true,
+                    breaks: true,
+                    smartLists: true,
+                    xhtml: true,
+                    async: false,
+                    langPrefix: 'hljs language-',
+                    emptyLangClass: 'no-lang',
+                    highlight: (code) => {
+                        return hljs.highlightAuto(code).value
+                    }
+                })
+            );
+            return marked.parse(message);
+        },
+        startAiTypingAnimation(aiText) {
+            if (this.aiTypingTimer) {
+                clearTimeout(this.aiTypingTimer);
+                this.aiTypingTimer = null;
+            }
+            this.aiTyping = true;
+            this.aiDisplayLines = [];
+            this.aiCurrentLineText = '';
+            this.aiTypingLineIdx = 0;
+            this.aiTypingCharIdx = 0;
+            this.aiTypingLines = aiText.split(/\r?\n/);
+            this.typeAiNextChar();
+        },
+        typeAiNextChar() {
+            if (this.aiTypingLineIdx >= this.aiTypingLines.length) {
+                this.aiCurrentLineText = '';
+                this.aiTyping = false;
+                // 动画结束后将AI消息push到messages
+                this.messages.push({
+                    text: this.aiTypingLines.join('\n'),
+                    isUser: false,
+                    timestamp: new Date()
+                });
+                this.$nextTick(() => {
+                    const container = document.querySelector('.message-list');
+                    if (container) container.scrollTop = container.scrollHeight;
+                });
+                return;
+            }
+            const line = this.aiTypingLines[this.aiTypingLineIdx];
+            if (this.aiTypingCharIdx < line.length) {
+                this.aiCurrentLineText += line[this.aiTypingCharIdx];
+                this.aiTypingCharIdx++;
+                this.aiTypingTimer = setTimeout(this.typeAiNextChar, 28);
+            } else {
+                this.aiDisplayLines.push(this.aiCurrentLineText);
+                this.aiCurrentLineText = '';
+                this.aiTypingLineIdx++;
+                this.aiTypingCharIdx = 0;
+                this.aiTypingTimer = setTimeout(this.typeAiNextChar, 180);
+            }
+        },
         sendMessage() {
             if (this.inputMessage.trim() === '') return;
-            this.form.message=this.inputMessage;
-            this.form.timestamp=new Date()
-
-            //发送消息到后端API
-            axios.post(this.url,this.form).then(response=>{
-                console.log(response.data.message);
-            })
-            .catch(error=>{
-                this.$message.error('发送失败：'+error.message);
-            })
-
-            
+            this.form.message = this.inputMessage;
+            this.form.timestamp = new Date();
             // 添加用户消息
             this.messages.push({
                 text: this.inputMessage,
                 isUser: true,
                 timestamp: this.form.timestamp
             });
-            
-            // 清空输入框
             this.inputMessage = '';
-            
-            // 自动滚动到底部
             this.$nextTick(() => {
                 const container = document.querySelector('.message-list');
-                container.scrollTop = container.scrollHeight;
+                if (container) container.scrollTop = container.scrollHeight;
             });
-            
-            // TODO: 这里添加API调用获取AI回复的逻辑
-            // 模拟AI回复
+            // 发送消息到后端API
+            axios.post(this.url, this.form).then(() => {
+                // 不直接push AI消息，走动画
+            })
+            .catch(error => {
+                this.$message.error('发送失败：' + error.message);
+            });
+            // 显示AI加载动画
+            this.aiTyping = true;
+            this.aiDisplayLines = [];
+            this.aiCurrentLineText = '';
+            this.aiTypingLineIdx = 0;
+            this.aiTypingCharIdx = 0;
+            this.aiTypingLines = [];
+            // 模拟AI回复动画
             setTimeout(() => {
                 axios.get(this.url).then(response => {
-                    console.log(response.data.AIMessage);
-                    this.messages.push({
-                    text: response.data.AIMessage,
-                    isUser: false,
-                    timestamp: new Date()
-                });
+                    this.startAiTypingAnimation(response.data.AIMessage || 'AI未返回内容');
                 })
                 .catch(error => {
                     this.$message.error('获取AI回复失败:' + error.message);
-                });
-                
-                // 再次自动滚动
-                this.$nextTick(() => {
-                    const container = document.querySelector('.message-list');
-                    container.scrollTop = container.scrollHeight;
+                    this.aiTyping = false;
                 });
             }, 1000);
         },
