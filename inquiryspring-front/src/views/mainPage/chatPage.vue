@@ -326,7 +326,9 @@ export default {
             aiTypingCharIdx: 0,
             aiTypingLines: [],
             selectedFile: null,
-            selectedFileName: '' // 新增：存储选中文件名
+            selectedFileName: '', // 新增：存储选中文件名
+            currentDocumentId: null, // 当前文档ID
+            isLoading: false // 加载状态
         }
     },
     created() {
@@ -409,11 +411,14 @@ export default {
                 if (container) container.scrollTop = container.scrollHeight;
             });
             // 发送消息到后端API
-            axios.post(this.url, this.form).then(() => {
+            axios.post(this.url, this.form).then((response) => {
+                console.log('消息发送成功:', response.data);
                 // 不直接push AI消息，走动画
             })
             .catch(error => {
+                console.error('发送失败:', error);
                 this.$message.error('发送失败：' + error.message);
+                this.aiTyping = false; // 发送失败时停止AI动画
             });
             // 显示AI加载动画
             this.aiTyping = true;
@@ -422,16 +427,19 @@ export default {
             this.aiTypingLineIdx = 0;
             this.aiTypingCharIdx = 0;
             this.aiTypingLines = [];
-            // 模拟AI回复动画
+            // 获取AI回复（减少延迟时间）
             setTimeout(() => {
                 axios.get(this.url).then(response => {
-                    this.startAiTypingAnimation(response.data.AIMessage || 'AI未返回内容');
+                    console.log('AI回复数据:', response.data); // 调试日志
+                    const aiMessage = response.data.ai_response || response.data.AIMessage || 'AI未返回内容';
+                    this.startAiTypingAnimation(aiMessage);
                 })
                 .catch(error => {
+                    console.error('获取AI回复失败:', error); // 调试日志
                     this.$message.error('获取AI回复失败:' + error.message);
                     this.aiTyping = false;
                 });
-            }, 20000);
+            }, 10000); // 从20秒减少到1秒
         },
         startAiTypingAnimation(aiText) {
             if (this.aiTypingTimer) {
@@ -496,14 +504,81 @@ export default {
         triggerFileInput() {
             this.$refs.fileInput.click();
         },
-        handleFileChange(event) {
+        async handleFileChange(event) {
             const file = event.target.files[0];
             if (file) {
                 this.selectedFile = file;
                 this.selectedFileName = file.name;
+
+                // 自动上传文件
+                await this.uploadDocument();
             } else {
                 this.selectedFile = null;
                 this.selectedFileName = '';
+                this.currentDocumentId = null;
+            }
+        },
+        async uploadDocument() {
+            if (!this.selectedFile) return;
+
+            const formData = new FormData();
+            formData.append('file', this.selectedFile);
+
+            try {
+                this.isLoading = true;
+                const response = await axios.post(this.HOST + '/chat/upload/', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                if (response.data.document_id) {
+                    this.currentDocumentId = response.data.document_id;
+
+                    // 添加系统消息到聊天记录
+                    const systemMsg = {
+                        text: `📄 文档 "${response.data.filename}" 上传成功！现在您可以基于这个文档进行问答。`,
+                        isUser: false,
+                        timestamp: new Date(),
+                        isSystem: true
+                    };
+
+                    this.messages.push(systemMsg);
+
+                    // 同步到store
+                    this.$store.dispatch('addChatMessage', {
+                        ...systemMsg,
+                        timestamp: systemMsg.timestamp.toISOString()
+                    });
+
+                    this.$nextTick(() => {
+                        const container = document.querySelector('.message-list');
+                        if (container) container.scrollTop = container.scrollHeight;
+                    });
+
+                    this.$message.success(`文档 "${response.data.filename}" 上传成功！`);
+                } else {
+                    throw new Error('文档上传失败');
+                }
+            } catch (error) {
+                console.error('文档上传失败:', error);
+
+                const errorMsg = {
+                    text: `❌ 文档上传失败: ${error.response?.data?.error || error.message}`,
+                    isUser: false,
+                    timestamp: new Date(),
+                    isSystem: true
+                };
+
+                this.messages.push(errorMsg);
+
+                this.$message.error(`文档上传失败: ${error.response?.data?.error || error.message}`);
+
+                this.selectedFile = null;
+                this.selectedFileName = '';
+                this.currentDocumentId = null;
+            } finally {
+                this.isLoading = false;
             }
         }
     }

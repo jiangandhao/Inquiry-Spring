@@ -7,3 +7,7 @@ apps/documents/__pycache__
 apps/quiz/__pycache__
 InquirySpring/__pycache__
 .idea
+tests/
+media/
+ai_services/
+start_backend.py
