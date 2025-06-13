@@ -13,10 +13,10 @@ from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings  # 新版本导入方式
 from langchain.chains import RetrievalQA
 
-from apps.documents.models import Document, DocumentChunk
+from inquiryspring_backend.documents.models import Document, DocumentChunk
 from .llm_client import LLMClientFactory
 from .prompt_manager import PromptManager
-from apps.quiz.models import Quiz, Question
+from inquiryspring_backend.quiz.models import Quiz, Question
 from django.conf import settings
 
 logger = logging.getLogger(__name__)

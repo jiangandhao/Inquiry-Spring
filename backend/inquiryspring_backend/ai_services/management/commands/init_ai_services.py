@@ -3,7 +3,7 @@
 """
 import logging
 from django.core.management.base import BaseCommand
-from apps.ai_services.models import AIModel, PromptTemplate
+from inquiryspring_backend.ai_services.models import AIModel, PromptTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ class Command(BaseCommand):
         self.create_or_update_default_models()
         
         # 初始化提示词模板
-        from apps.ai_services.prompt_manager import PromptManager
+        from inquiryspring_backend.ai_services.prompt_manager import PromptManager
         PromptManager.create_default_templates()
         
         self.stdout.write(self.style.SUCCESS('AI服务初始化完成!'))
